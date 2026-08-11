@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { Heart, Download, Share2, Eye, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Photo, mockPhotos } from '@/lib/mock-photo-data';
+import { Photo } from '@/lib/domain/models';
 
 interface GalleryGridProps {
+  photos: Photo[];
   limit?: number;
   className?: string;
   onLoadMore?: () => void;
@@ -16,6 +17,7 @@ interface GalleryGridProps {
 }
 
 export function GalleryGrid({ 
+  photos,
   limit = 6, 
   className = "", 
   onLoadMore,
@@ -28,7 +30,7 @@ export function GalleryGrid({
   const [likedPhotos, setLikedPhotos] = useState<Set<string>>(new Set());
 
   // Filter photos based on selected tags and search query
-  const filteredPhotos = mockPhotos.filter(photo => {
+  const filteredPhotos = photos.filter(photo => {
     // Filter by tags
     const matchesTags = selectedTags.length === 0 || 
       selectedTags.some(tag => photo.tags.includes(tag.toLowerCase()));
