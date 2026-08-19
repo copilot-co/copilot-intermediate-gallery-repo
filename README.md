@@ -16,6 +16,7 @@ Latest recommended guides (Option 2):
 - [Engineering Practices Demo (Option 2)](demos/engineering-practices-option-2.md)
 - [Customize Copilot Demo (Option 2)](demos/customize-copilot-option-2.md)
 - [Cloud Agent Demo (Option 2)](demos/cloud-agent-option-2.md)
+- [Agentic Workflow Redesign Demo](demos/agentic-workflow-redesign.md)
 
 Original guides:
 

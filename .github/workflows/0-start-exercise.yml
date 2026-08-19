@@ -1,0 +1,38 @@
+name: "Agentic Exercise · 0 Start"
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  find_exercise:
+    if: contains(github.event.issue.labels.*.name, 'agentic-exercise')
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ github.event.issue.number }}
+    steps:
+      - run: echo "Tracking issue number ${{ github.event.issue.number }} opened by ${{ github.event.issue.user.login }}"
+
+  post_next_step_content:
+    needs: find_exercise
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/agentic-exercise-helpers.js`);
+            const issue_number = ${{ needs.find_exercise.outputs.issue_number }};
+
+            // The issue template should already carry `step-1`, but ensure it.
+            await helpers.addLabels(github, context, issue_number, ['step-1']);
+
+            const body = fs.readFileSync(
+              `${process.env.GITHUB_WORKSPACE}/.github/steps/0-welcome.md`,
+              'utf8'
+            );
+            await helpers.postComment(github, context, issue_number, body);
