@@ -1,0 +1,101 @@
+name: "Agentic Exercise · 4 Delegate to agent"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  find_exercise:
+    if: |
+      github.event.issue.pull_request == null &&
+      contains(github.event.issue.labels.*.name, 'agentic-exercise') &&
+      contains(github.event.issue.labels.*.name, 'step-4') &&
+      github.event.comment.user.login == github.event.issue.user.login
+    runs-on: ubuntu-latest
+    outputs:
+      issue_number: ${{ github.event.issue.number }}
+    steps:
+      - run: echo "Checking Step 4 on tracking issue number ${{ github.event.issue.number }}"
+
+  check_step_work:
+    needs: find_exercise
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+      pr_number: ${{ steps.check.outputs.pr_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/agentic-exercise-helpers.js`);
+            const issue_number = ${{ needs.find_exercise.outputs.issue_number }};
+            const comment = context.payload.comment.body || '';
+            const refs = helpers.extractIssueRefs(comment).filter(n => n !== issue_number);
+            const specIssue = helpers.readRefLabel(context.payload.issue, 'spec');
+
+            if (refs.length === 0) {
+              await helpers.postComment(github, context, issue_number,
+                `### 🔧 Not quite yet\n\nI didn't find a PR reference in your comment. Comment again with something like \`PR: #48\`.`);
+              core.setOutput('passed', 'false');
+              return;
+            }
+
+            const prNumber = refs[0];
+            let pr;
+            try {
+              const res = await github.rest.pulls.get({ ...context.repo, pull_number: prNumber });
+              pr = res.data;
+            } catch (e) {
+              await helpers.postComment(github, context, issue_number,
+                `### 🔧 Not quite yet\n\nI couldn't find pull request #${prNumber} in this repo. Double-check the number and comment again.`);
+              core.setOutput('passed', 'false');
+              return;
+            }
+
+            const referencesSpec = specIssue && (pr.body || '').includes(`#${specIssue}`);
+            const files = await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber, per_page: 100 });
+            const touchesSrc = files.data.some(f => f.filename.startsWith('src/'));
+            const passed = Boolean(referencesSpec) && touchesSrc;
+
+            if (!passed) {
+              const missing = [];
+              if (!referencesSpec) missing.push(`its body referencing your spec issue (\`#${specIssue}\`)`);
+              if (!touchesSrc) missing.push('changes under `src/`');
+              await helpers.postComment(github, context, issue_number,
+                `### 🔧 Not quite yet\n\nPR #${prNumber} is missing:\n\n${missing.map(m => `- ${m}`).join('\n')}\n\nUpdate the PR (or its description) and comment here again.`);
+              core.setOutput('passed', 'false');
+              return;
+            }
+
+            core.setOutput('passed', 'true');
+            core.setOutput('pr_number', String(prNumber));
+
+  post_next_step_content:
+    needs: [find_exercise, check_step_work]
+    if: needs.check_step_work.outputs.passed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/agentic-exercise-helpers.js`);
+            const issue_number = ${{ needs.find_exercise.outputs.issue_number }};
+            const prNumber = '${{ needs.check_step_work.outputs.pr_number }}';
+
+            await helpers.swapLabel(github, context, issue_number, 'step-4', 'step-5');
+            await helpers.addLabels(github, context, issue_number, [`pr-${prNumber}`]);
+
+            let body = fs.readFileSync(
+              `${process.env.GITHUB_WORKSPACE}/.github/steps/5-step.md`,
+              'utf8'
+            );
+            body = body.replaceAll('{{pr}}', prNumber);
+            await helpers.postComment(github, context, issue_number, body);
