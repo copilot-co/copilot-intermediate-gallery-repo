@@ -59,6 +59,18 @@ Experience GitHub Copilot as a cloud agent to accelerate building and enhancing 
 
 ---
 
+### 6. Agentic Workflow Redesign Demo ([agentic-workflow-redesign.md](agentic-workflow-redesign.md))
+**Overview:**  
+Take a real feature request and redesign the workflow used to build it — from an implicit, manual process into an explicit, context-engineered one that a Copilot coding agent can run.  
+**Key Skills:**  
+- Deconstruct and classify a manual development workflow  
+- Write context-engineered specs (files, conventions, acceptance criteria, non-goals)  
+- Delegate a feature to a Copilot coding agent  
+- Review agent output against criteria and iterate with targeted prompts  
+- Compare manual vs. agentic workflows
+
+---
+
 ## How to Use These Demos
 
 1. Start with the first demo and work through each guide in order.
