@@ -92,9 +92,8 @@ export function GalleryGrid({
   // Calculate pagination
   const totalPhotos = filteredPhotos.length;
   const photosPerPage = showAll ? totalPhotos : limit;
-  const startIndex = 0;
   const endIndex = showAll ? totalPhotos : currentPage * photosPerPage;
-  const displayedPhotos = isWaitingForFavorites ? [] : filteredPhotos.slice(startIndex, endIndex);
+  const displayedPhotos = isWaitingForFavorites ? [] : filteredPhotos.slice(0, endIndex);
   const hasMore = !showAll && endIndex < totalPhotos;
 
   const toggleFavorite = (photoId: string) => {
