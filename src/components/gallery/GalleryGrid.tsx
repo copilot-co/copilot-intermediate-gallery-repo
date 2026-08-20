@@ -212,7 +212,7 @@ export function GalleryGrid({
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
                     <Heart className="h-4 w-4" />
-                    {photo.likes + (isFavorite ? 1 : 0)}
+                    {photo.likes}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
