@@ -1,6 +1,5 @@
 import { GalleryGrid } from "@/components/gallery/GalleryGrid";
 import { Hero, SectionContainer, SectionTitle } from "@/components/ui";
-import { mockPhotos } from "@/lib/mock-photo-data";
 
 export default function FavoritesPage() {
   return (
@@ -13,9 +12,9 @@ export default function FavoritesPage() {
       <SectionContainer>
         <SectionTitle title="Favorites" />
         <GalleryGrid
-          limit={mockPhotos.length}
           currentPage={1}
           favoritesOnly
+          showAll
           emptyTitle="No favorite photos yet"
           emptyDescription="Use the heart button on any photo to add it to your favorites."
         />

@@ -16,6 +16,7 @@ interface GalleryGridProps {
   searchQuery?: string;
   currentPage?: number;
   favoritesOnly?: boolean;
+  showAll?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
 }
@@ -29,6 +30,7 @@ export function GalleryGrid({
   searchQuery = "",
   currentPage = 1,
   favoritesOnly = false,
+  showAll = false,
   emptyTitle,
   emptyDescription
 }: GalleryGridProps) {
@@ -85,13 +87,15 @@ export function GalleryGrid({
     return matchesFavorites && matchesTags && matchesSearch;
   });
 
+  const isWaitingForFavorites = favoritesOnly && !favoritesLoaded;
+
   // Calculate pagination
   const totalPhotos = filteredPhotos.length;
-  const photosPerPage = limit;
+  const photosPerPage = showAll ? totalPhotos : limit;
   const startIndex = 0;
-  const endIndex = currentPage * photosPerPage;
-  const displayedPhotos = filteredPhotos.slice(startIndex, endIndex);
-  const hasMore = endIndex < totalPhotos;
+  const endIndex = showAll ? totalPhotos : currentPage * photosPerPage;
+  const displayedPhotos = isWaitingForFavorites ? [] : filteredPhotos.slice(startIndex, endIndex);
+  const hasMore = !showAll && endIndex < totalPhotos;
 
   const toggleFavorite = (photoId: string) => {
     setFavoritePhotos(prev => {
@@ -234,7 +238,7 @@ export function GalleryGrid({
       </div>
 
       {/* Loading State */}
-      {favoritesOnly && !favoritesLoaded && displayedPhotos.length === 0 && (
+      {isWaitingForFavorites && (
         <div className="text-center py-16">
           <p className="text-slate-500 dark:text-slate-400">
             Loading favorites...
@@ -243,7 +247,7 @@ export function GalleryGrid({
       )}
 
       {/* Empty State */}
-      {(!favoritesOnly || favoritesLoaded) && displayedPhotos.length === 0 && (
+      {!isWaitingForFavorites && displayedPhotos.length === 0 && (
         <div className="text-center py-16">
           <div className="bg-slate-100 dark:bg-slate-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
             {favoritesOnly ? (
