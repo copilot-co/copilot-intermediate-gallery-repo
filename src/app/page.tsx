@@ -2,8 +2,11 @@ import { GalleryGrid } from "@/components/gallery/GalleryGrid";
 import { UploadZone } from "@/components/upload/UploadZone";
 import { Hero, SectionContainer, SectionTitle, FeatureCard } from "@/components/ui";
 import { featureCardsData } from "@/lib/mock-feature-card-data";
+import { getPhotos } from '@/lib/persistence';
 
-export default function Home() {
+export default async function Home() {
+  const photos = await getPhotos();
+
   return (
     <div className="page-gradient">
       {/* Hero Section */}
@@ -36,7 +39,7 @@ export default function Home() {
       {/* Recent Gallery Preview */}
       <SectionContainer>
         <SectionTitle title="Recent Uploads" viewAllLink="/gallery" />
-        <GalleryGrid limit={6} currentPage={1} />
+        <GalleryGrid photos={photos} limit={6} currentPage={1} />
       </SectionContainer>
     </div>
   );

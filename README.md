@@ -80,6 +80,34 @@ Once ready, you can access the application at the forwarded port URL provided in
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Persistent Gallery Data Setup
+
+Gallery photos, tags, galleries, users, and dashboard statistics are now loaded from persistent storage instead of runtime mock arrays.
+
+1. Copy environment defaults:
+   ```bash
+   cp .env.example .env.local
+   ```
+2. Run migrations (creates the local data store if missing):
+   ```bash
+   npm run db:migrate
+   ```
+3. Seed demo data:
+   ```bash
+   npm run db:seed
+   ```
+
+#### Persistence configuration
+
+- `GALLERY_DATA_PATH` - path to the JSON data file (default `./data/gallery-data.json`)
+- `GALLERY_MEDIA_BASE_URL` - base URL used to resolve object-storage media keys (default `/`)
+
+#### Verify repository tests
+
+```bash
+npm run test
+```
+
 ## Project Structure
 
 ```bash

@@ -1,9 +1,23 @@
 import { Users, Plus, Eye, Edit, Trash2, Settings } from "lucide-react";
 import Link from "next/link";
 import { Hero, SectionContainer, SectionTitle, FeatureCard, StatsGrid } from "@/components/ui";
-import { dashboardStats, recentGalleries } from "@/lib/mock-admin-data";
+import { FolderOpen, BarChart3 } from 'lucide-react';
+import { getDashboardStats, getRecentGalleries } from '@/lib/persistence';
 
-export default function AdminPage() {
+const dashboardStatIcons = {
+  'Total Photos': FolderOpen,
+  'Active Galleries': FolderOpen,
+  'Client Projects': Users,
+  'This Month Views': BarChart3,
+} as const;
+
+export default async function AdminPage() {
+  const [dashboardStats, recentGalleries] = await Promise.all([getDashboardStats(), getRecentGalleries()]);
+  const statsWithIcons = dashboardStats.map((stat) => ({
+    ...stat,
+    icon: dashboardStatIcons[stat.label as keyof typeof dashboardStatIcons] ?? FolderOpen,
+  }));
+
   return (
     <div className="page-gradient">
       <Hero
@@ -14,7 +28,7 @@ export default function AdminPage() {
       <SectionContainer>
         {/* Stats Grid */}
         <SectionTitle title="Stats Overview" className="mb-6" />
-        <StatsGrid stats={dashboardStats} />
+        <StatsGrid stats={statsWithIcons} />
 
         {/* Quick Actions */}
         <SectionTitle title="Quick Actions" />
