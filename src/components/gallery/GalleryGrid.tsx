@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Heart, Download, Share2, Eye, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Photo, mockPhotos } from '@/lib/mock-photo-data';
@@ -62,6 +62,30 @@ export function GalleryGrid({
       return newLiked;
     });
   };
+
+  useEffect(() => {
+    if (!selectedPhoto) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+
+    // Lock background scrolling while the modal is open.
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedPhoto(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedPhoto]);
 
   return (
     <div className={`w-full ${className}`}>
@@ -209,16 +233,25 @@ export function GalleryGrid({
         </div>
       )}
 
-      {/* Photo Detail Modal - Placeholder for future implementation */}
-
+      {/* Photo Detail Modal */}
       {selectedPhoto && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="photo-detail-title"
+            className="bg-white dark:bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">{selectedPhoto.title}</h2>
+                <h2 id="photo-detail-title" className="text-2xl font-bold">{selectedPhoto.title}</h2>
                 <button
                   onClick={() => setSelectedPhoto(null)}
+                  aria-label="Close photo details"
                   className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 >
                   ✕
