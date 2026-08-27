@@ -1,0 +1,78 @@
+name: "AI Workforce - Step 8: Prove reusability"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  pull-requests: read
+  contents: read
+
+jobs:
+  find_exercise:
+    if: >-
+      !github.event.issue.pull_request &&
+      contains(github.event.issue.labels.*.name, 'ai-workforce') &&
+      contains(github.event.issue.labels.*.name, 'step-8') &&
+      github.event.comment.user.login == github.event.issue.user.login
+    runs-on: ubuntu-latest
+    outputs:
+      found: ${{ steps.find.outputs.found }}
+      pr_number: ${{ steps.find.outputs.pr_number }}
+    steps:
+      - id: find
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          NUM=$(echo "$COMMENT_BODY" | grep -ioE 'Favorites PR:\s*#[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+          if [ -n "$NUM" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "pr_number=$NUM" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  check_step_work:
+    needs: find_exercise
+    if: needs.find_exercise.outputs.found == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.grade.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: grade
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
+            const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
+            // Self-evident check only: the PR existing (linked here via this very
+            // comment's correlation) is the required signal, matching this repo's
+            // existing precedent for PR-gated steps (see AI_WORKFORCE_MAINTAINERS.md).
+            let passed = false;
+            try {
+              await github.rest.pulls.get({ ...context.repo, pull_number: prNumber });
+              passed = true;
+            } catch (e) {
+              await helpers.postComment(github, context, context.issue.number,
+                `I couldn't find PR #${prNumber} — double check the number and comment again once it's open.`);
+            }
+            core.setOutput('passed', String(passed));
+
+  post_next_step_content:
+    needs: [find_exercise, check_step_work]
+    if: needs.check_step_work.outputs.passed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
+            const prNumber = '${{ needs.find_exercise.outputs.pr_number }}';
+            await helpers.addLabels(github, context, context.issue.number, [`favorites-pr-${prNumber}`]);
+            const body = fs.readFileSync('.github/steps/ai-workforce-9-step.md', 'utf8');
+            await helpers.postComment(github, context, context.issue.number, body);
+            await helpers.swapLabel(github, context, context.issue.number, 'step-8', 'step-9');
