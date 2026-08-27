@@ -49,7 +49,7 @@ jobs:
             const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
             // Self-evident check only: the PR existing (linked here via this very
             // comment's correlation) is the required signal, matching this repo's
-            // existing precedent for PR-gated steps (see AGENTIC_EXERCISE_MAINTAINERS.md).
+            // existing precedent for PR-gated steps (see AI_WORKFORCE_MAINTAINERS.md).
             let passed = false;
             try {
               await github.rest.pulls.get({ ...context.repo, pull_number: prNumber });

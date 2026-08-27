@@ -2,14 +2,17 @@
 
 This document is for repo maintainers, not learners. It explains how the automated
 "AI-Native Workforce Workflow" exercise is wired up, how to validate it, and how to
-reset a run. It follows the same shared-repo, tracking-issue architecture as the
-"Agentic Workflow Redesign" exercise (see `AGENTIC_EXERCISE_MAINTAINERS.md`), kept
-in a separate `ai-workforce-*` namespace so the two can coexist without collisions.
+reset a run. It reuses the shared-repo, tracking-issue architecture originally
+introduced by the now-removed "Agentic Workflow Redesign" exercise, kept in a
+separate `ai-workforce-*` namespace.
 
 ## Architecture
 
 A single shared tracking issue (opened from the `ai-workforce-start.md` template)
-follows a learner through all 9 steps. Steps that require a real artifact (context
+follows a learner through all 9 steps. This is the only supported exercise in
+this repository — the earlier "Agentic Workflow Redesign" exercise and its
+`agentic-exercise-start.md` template/maintainer doc have been removed since none
+of their step workflows exist anymore. Steps that require a real artifact (context
 files, a mock integration, a proactive agent, a parallel-subagent coding pair, a
 maintenance graph, or the final Favorites PR) are correlated to the tracking issue
 via a learner comment referencing a PR number (e.g. `Context PR: #45`), which the
