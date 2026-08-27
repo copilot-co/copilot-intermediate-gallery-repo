@@ -48,9 +48,11 @@ jobs:
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
             const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
             let files = [];
+            let comments = [];
             try {
               const res = await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber });
               files = res.data;
+              comments = (await github.rest.issues.listComments({ ...context.repo, issue_number: prNumber })).data;
             } catch (e) {
               await helpers.postComment(github, context, context.issue.number,
                 `I couldn't find PR #${prNumber} — double check the number and comment again.`);
@@ -61,12 +63,19 @@ jobs:
             const mockFiles = files.filter((f) =>
               /mock-integration/i.test(f.filename) || /\.github\/workflows\/.*integration/i.test(f.filename));
             const combinedPatch = files.map((f) => f.patch || '').join('\n');
-            const hasNote = helpers.hasNoteCallout(combinedPatch) && /webhook/i.test(combinedPatch);
-            const passed = mockFiles.length >= 1 && hasNote;
+            const hasFileEvidence = mockFiles.length >= 1 &&
+              helpers.hasNoteCallout(combinedPatch) && /webhook/i.test(combinedPatch);
+
+            const hasCommentEvidence = comments.some((c) => {
+              const body = c.body || '';
+              return /slack|teams/i.test(body) && helpers.hasNoteCallout(body) && /webhook/i.test(body);
+            });
+
+            const passed = hasFileEvidence || hasCommentEvidence;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `PR #${prNumber} needs a mock integration file (e.g. \`mock-integration-output.json\` or a workflow under \`.github/workflows/\`) plus a \`[!NOTE]\` callout mentioning where a real webhook would go.`);
+                `PR #${prNumber} needs a mock integration file (e.g. \`mock-integration-output.json\` or a workflow under \`.github/workflows/\`) plus a \`[!NOTE]\` callout mentioning where a real webhook would go — or a PR comment with the mock Slack/Teams payload, a \`[!NOTE]\` callout, and a mention of the real webhook.`);
             }
             core.setOutput('passed', String(passed));
 
