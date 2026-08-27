@@ -2,7 +2,7 @@
 
 Time to put a loop to work with parallel subagents underneath it.
 
-1. Create an orchestrating agent (`.github/agents/coding-agent.md`) that, given a ticket, dispatches **parallel subagents** for distinct pieces of the same task — for example:
+1. Create an orchestrating agent (`.github/agents/coding-agent.agent.md`) that, given a ticket, dispatches **parallel subagents** for distinct pieces of the same task — for example:
    - `.github/agents/subagent-component.agent.md` — writes the component/feature code.
    - `.github/agents/subagent-tests.agent.md` — writes tests.
    - `.github/agents/subagent-docs.agent.md` — updates docs.
