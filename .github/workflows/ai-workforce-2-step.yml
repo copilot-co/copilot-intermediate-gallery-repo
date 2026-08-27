@@ -56,9 +56,15 @@ jobs:
               return;
             }
 
-            const contextFiles = helpers.countMatchingFiles(files, { pathIncludes: '.github/prompts/', nameEndsWith: '.prompt.md' });
+            const requiredContextFiles = [
+              '.github/prompts/context-feature.prompt.md',
+              '.github/prompts/context-bugfix.prompt.md',
+              '.github/prompts/context-docs.prompt.md',
+            ];
+            const contextFiles = files.filter((f) => requiredContextFiles.includes(f.filename));
             const withKnownFile = contextFiles.filter((f) => helpers.mentionsKnownFile(f.patch || ''));
-            const passed = contextFiles.length >= 3 && withKnownFile.length >= 1;
+            const passed = contextFiles.length === requiredContextFiles.length &&
+              withKnownFile.length === requiredContextFiles.length;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
