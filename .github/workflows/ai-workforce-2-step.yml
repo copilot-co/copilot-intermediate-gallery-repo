@@ -57,18 +57,20 @@ jobs:
             }
 
             const requiredContextFiles = [
-              '.github/prompts/context-feature.prompt.md',
-              '.github/prompts/context-bugfix.prompt.md',
-              '.github/prompts/context-docs.prompt.md',
+              '.github/instructions/context-feature.instructions.md',
+              '.github/instructions/context-bugfix.instructions.md',
+              '.github/instructions/context-docs.instructions.md',
             ];
             const contextFiles = files.filter((f) => requiredContextFiles.includes(f.filename));
             const withKnownFile = contextFiles.filter((f) => helpers.mentionsKnownFile(f.patch || ''));
+            const withApplyTo = contextFiles.filter((f) => /applyTo\s*:/.test(f.patch || ''));
             const passed = contextFiles.length === requiredContextFiles.length &&
-              withKnownFile.length === requiredContextFiles.length;
+              withKnownFile.length === requiredContextFiles.length &&
+              withApplyTo.length === requiredContextFiles.length;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `PR #${prNumber} has ${contextFiles.length} prompt file(s) under \`.github/prompts/\` and ${withKnownFile.length} referencing a real repo file/pattern. Add 3 files (feature, bugfix, docs), each naming something concrete like \`GalleryGrid.tsx\` or \`mock-photo-data.ts\`, then comment again.`);
+                `PR #${prNumber} has ${contextFiles.length} instructions file(s) under \`.github/instructions/\`, ${withApplyTo.length} with an \`applyTo\` glob, and ${withKnownFile.length} referencing a real repo file/pattern. Add 3 files (feature, bugfix, docs), each with an \`applyTo\` frontmatter glob and naming something concrete like \`GalleryGrid.tsx\` or \`mock-photo-data.ts\`, then comment again.`);
             }
             core.setOutput('passed', String(passed));
 

@@ -60,7 +60,7 @@ Each step workflow follows the standard `find_exercise` → `check_step_work` �
 | Step | Trigger | What's graded |
 | --- | --- | --- |
 | 1 | Issue body edited | ≥3 list items in the issue body |
-| 2 | Comment: `Context PR: #N` | ≥3 files under `.github/prompts/` ending `.prompt.md`, ≥1 referencing a known repo file |
+| 2 | Comment: `Context PR: #N` | 3 files under `.github/instructions/` ending `.instructions.md`, each with an `applyTo` glob and referencing a known repo file |
 | 3 | Comment | Comment names a skill, a decision, and a rationale |
 | 4 | Comment: `Integration PR: #N` | ≥1 mock-integration file, plus a `[!NOTE]` callout mentioning "webhook" |
 | 5 | Comment: `Proactive PR: #N` | A workflow file with a daily `cron:` schedule, and an agent file mentioning priority/ranking |
