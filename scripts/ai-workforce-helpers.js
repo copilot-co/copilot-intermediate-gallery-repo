@@ -59,7 +59,7 @@ function checkMermaidGraph(mermaidBody, { minNodes = 3 } = {}) {
   const result = { nodeCount: 0, hasFanOut: false, hasEscalation: false };
   if (!mermaidBody) return result;
 
-  const edgeRe = /([A-Za-z0-9_]+)\s*(?:--[^-\n>]*-->|-->)\s*([A-Za-z0-9_]+)/g;
+  const edgeRe = /([A-Za-z0-9_]+)\s*(?:-->|--[^-\n>]*-->)\s*(?:\|[^|\n]*\|\s*)?([A-Za-z0-9_]+)/g;
   const nodes = new Set();
   const outEdges = {};
   let match;
