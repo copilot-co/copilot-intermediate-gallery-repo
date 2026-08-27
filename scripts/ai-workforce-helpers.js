@@ -36,7 +36,7 @@ function hasDailyCronSchedule(yamlText) {
 /** Whether text contains a GitHub `[!NOTE]` callout. */
 function hasNoteCallout(text) {
   if (!text) return false;
-  return /^>\s*\[!NOTE\]/m.test(text);
+  return /^[+ ]?>\s*\[!NOTE\]/m.test(text);
 }
 
 /**
