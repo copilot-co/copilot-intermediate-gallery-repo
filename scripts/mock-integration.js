@@ -2,18 +2,20 @@
 /**
  * Mocks an outbound Slack/Teams-style notification for this repo's PR workflow.
  *
- * > [!NOTE]
- * > In production this step would `POST` the payload below to a real Slack
- * > incoming webhook (or Teams connector) URL, e.g.:
- * >   curl -X POST -H 'Content-Type: application/json' \
- * >     --data @mock-integration-output.json "$SLACK_WEBHOOK_URL"
- * > To make it real: add a `SLACK_WEBHOOK_URL` repository secret, swap the
- * > `writeFileSync` call below for a `fetch()`/`curl` POST to that secret, and
- * > remove the "(mock)" prefix from the message text.
- *
  * No real webhook URL or credentials are required to run this script — it
  * only ever writes a local JSON file describing what *would* be sent.
  */
+
+/*
+> [!NOTE]
+> In production this step would `POST` the payload below to a real Slack
+> incoming webhook (or Teams connector) URL, e.g.:
+>   curl -X POST -H 'Content-Type: application/json' \
+>     --data @mock-integration-output.json "$SLACK_WEBHOOK_URL"
+> To make it real: add a `SLACK_WEBHOOK_URL` repository secret, swap the
+> `writeFileSync` call below for a `fetch()`/`curl` POST to that secret, and
+> remove the "(mock)" prefix from the message text.
+*/
 
 const fs = require('fs');
 const path = require('path');
