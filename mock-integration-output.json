@@ -1,0 +1,24 @@
+{
+  "channel": "#gallery-app-releases",
+  "username": "Photo Gallery Bot (mock)",
+  "icon_emoji": ":camera:",
+  "text": "(mock) :rocket: *unknown-user* opened PR #N/A in `owner/repo`",
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*(mock) New pull request*\n<https://github.com|#N/A: Untitled pull request>"
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "Author: unknown-user | Repo: owner/repo | Generated: 2026-09-02T15:49:11.487Z"
+        }
+      ]
+    }
+  ]
+}
