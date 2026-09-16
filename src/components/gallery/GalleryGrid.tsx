@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Heart, Download, Share2, Eye, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Photo, mockPhotos } from '@/lib/mock-photo-data';
+import { useFavorites } from '@/lib/use-favorites';
 
 interface GalleryGridProps {
   limit?: number;
@@ -13,6 +14,7 @@ interface GalleryGridProps {
   selectedTags?: string[];
   searchQuery?: string;
   currentPage?: number;
+  favoritesOnly?: boolean;
 }
 
 export function GalleryGrid({ 
@@ -22,10 +24,11 @@ export function GalleryGrid({
   isLoading = false,
   selectedTags = [],
   searchQuery = "",
-  currentPage = 1
+  currentPage = 1,
+  favoritesOnly = false
 }: GalleryGridProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [likedPhotos, setLikedPhotos] = useState<Set<string>>(new Set());
+  const { toggleFavorite, isFavorite, isLoaded: favoritesLoaded } = useFavorites();
 
   // Filter photos based on selected tags and search query
   const filteredPhotos = mockPhotos.filter(photo => {
@@ -38,8 +41,11 @@ export function GalleryGrid({
       photo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       photo.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (photo.photographer && photo.photographer.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // Optionally restrict to favorited photos only (used by the /favorites page)
+    const matchesFavorites = !favoritesOnly || isFavorite(photo.id);
     
-    return matchesTags && matchesSearch;
+    return matchesTags && matchesSearch && matchesFavorites;
   });
 
   // Calculate pagination
@@ -50,18 +56,6 @@ export function GalleryGrid({
   const endIndex = currentPage * photosPerPage;
   const displayedPhotos = filteredPhotos.slice(startIndex, endIndex);
   const hasMore = endIndex < totalPhotos;
-
-  const toggleLike = (photoId: string) => {
-    setLikedPhotos(prev => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(photoId)) {
-        newLiked.delete(photoId);
-      } else {
-        newLiked.add(photoId);
-      }
-      return newLiked;
-    });
-  };
 
   return (
     <div className={`w-full ${className}`}>
@@ -102,21 +96,23 @@ export function GalleryGrid({
               </div>
 
               {/* Action Buttons */}
-              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-3 right-3 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity duration-300">
                 <button
-                  onClick={() => toggleLike(photo.id)}
-                  className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-                    likedPhotos.has(photo.id)
+                  onClick={() => toggleFavorite(photo.id)}
+                  aria-label={isFavorite(photo.id) ? `Remove ${photo.title} from favorites` : `Add ${photo.title} to favorites`}
+                  aria-pressed={isFavorite(photo.id)}
+                  className={`p-3 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                    isFavorite(photo.id)
                       ? 'bg-red-500 text-white'
                       : 'bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
                   }`}
                 >
-                  <Heart className={`h-4 w-4 ${likedPhotos.has(photo.id) ? 'fill-current' : ''}`} />
+                  <Heart className={`h-4 w-4 ${isFavorite(photo.id) ? 'fill-current' : ''}`} />
                 </button>
-                <button className="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm transition-colors">
+                <button className="p-3 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center rounded-full bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900">
                   <Download className="h-4 w-4" />
                 </button>
-                <button className="p-2 rounded-full bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm transition-colors">
+                <button className="p-3 sm:p-2 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center rounded-full bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 backdrop-blur-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900">
                   <Share2 className="h-4 w-4" />
                 </button>
               </div>
@@ -151,7 +147,7 @@ export function GalleryGrid({
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
                     <Heart className="h-4 w-4" />
-                    {photo.likes + (likedPhotos.has(photo.id) ? 1 : 0)}
+                    {photo.likes + (isFavorite(photo.id) ? 1 : 0)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
@@ -176,19 +172,28 @@ export function GalleryGrid({
       </div>
 
       {/* Empty State */}
-      {displayedPhotos.length === 0 && (
+      {displayedPhotos.length === 0 && (!favoritesOnly || favoritesLoaded) && (
         <div className="text-center py-16">
           <div className="bg-slate-100 dark:bg-slate-800 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <Eye className="h-8 w-8 text-slate-400" />
+            {favoritesOnly ? (
+              <Heart className="h-8 w-8 text-slate-400" />
+            ) : (
+              <Eye className="h-8 w-8 text-slate-400" />
+            )}
           </div>
           <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            {selectedTags.length > 0 || searchQuery ? 'No photos match your filters' : 'No photos yet'}
+            {favoritesOnly
+              ? 'No favorites yet'
+              : selectedTags.length > 0 || searchQuery
+                ? 'No photos match your filters'
+                : 'No photos yet'}
           </h3>
           <p className="text-slate-500 dark:text-slate-400">
-            {selectedTags.length > 0 || searchQuery 
-              ? 'Try adjusting your search terms or selected tags' 
-              : 'Upload your first photos to get started'
-            }
+            {favoritesOnly
+              ? 'Tap the heart on a photo in the gallery to save it here'
+              : selectedTags.length > 0 || searchQuery
+                ? 'Try adjusting your search terms or selected tags'
+                : 'Upload your first photos to get started'}
           </p>
         </div>
       )}
