@@ -17,7 +17,7 @@ files, a mock integration, a proactive agent, a parallel-subagent coding pair, a
 maintenance graph, or the final Favorites PR) are correlated to the tracking issue
 via a learner comment referencing a PR number (e.g. `Context PR: #45`), which the
 workflow then fetches and grades. Steps that only need a written answer (1, 3, 9)
-are graded directly against the issue body/comment text.
+are graded directly against comment text.
 
 ```
 .github/ISSUE_TEMPLATE/ai-workforce-start.md   # opens the tracking issue (labels: ai-workforce, step-1)
@@ -59,7 +59,7 @@ Each step workflow follows the standard `find_exercise` → `check_step_work` �
 
 | Step | Trigger | What's graded |
 | --- | --- | --- |
-| 1 | Issue body edited | ≥3 list items in the issue body |
+| 1 | Comment: `ready` | The issue author confirms the GitHub Copilot app and repository session are ready |
 | 2 | Comment: `Context PR: #N` | 3 files under `.github/instructions/` ending `.instructions.md`, each with an `applyTo` glob and referencing a known repo file |
 | 3 | Comment | Comment names a skill, a decision, and a rationale |
 | 4 | Comment: `Integration PR: #N` | ≥1 mock-integration file, plus a `[!NOTE]` callout mentioning "webhook" |
@@ -93,9 +93,7 @@ Each step workflow follows the standard `find_exercise` → `check_step_work` �
 
 ## Reset / retry behavior
 
-- **Step 1**: learners can edit the tracking issue body as many times as needed;
-  `ai-workforce-1-step.yml` re-runs on every edit.
-- **Steps 2-9**: learners can post as many comments as needed; each new comment
+- **Steps 1-9**: learners can post as many comments as needed; each new comment
   re-triggers the corresponding workflow while the label still matches that step.
 - **Full restart**: a maintainer can move a stuck tracking issue back to an
   earlier step by manually swapping its `step-N` label (and removing any

@@ -1,8 +1,8 @@
-name: "AI Workforce - Step 1: Baseline friction"
+name: "AI Workforce - Step 1: Open your workspace"
 
 on:
-  issues:
-    types: [edited]
+  issue_comment:
+    types: [created]
 
 permissions:
   issues: write
@@ -11,8 +11,10 @@ permissions:
 jobs:
   find_exercise:
     if: >-
+      !github.event.issue.pull_request &&
       contains(github.event.issue.labels.*.name, 'ai-workforce') &&
-      contains(github.event.issue.labels.*.name, 'step-1')
+      contains(github.event.issue.labels.*.name, 'step-1') &&
+      github.event.comment.user.login == github.event.issue.user.login
     runs-on: ubuntu-latest
     outputs:
       found: "true"
@@ -32,12 +34,11 @@ jobs:
         with:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const body = context.payload.issue.body || '';
-            const count = helpers.countListItems(body);
-            const passed = count >= 3;
+            const body = context.payload.comment.body || '';
+            const passed = body.trim().toLowerCase() === 'ready';
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `Almost — I count ${count} friction point(s) in the issue body right now. List **3-4 specific** things that slow you down in this repo (reference a real file or pattern where you can), then save the edit again.`);
+                'When the GitHub Copilot app is open and this repository has an agent session, comment `ready` to continue.');
             }
             core.setOutput('passed', String(passed));
 
