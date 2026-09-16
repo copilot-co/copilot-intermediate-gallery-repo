@@ -12,7 +12,7 @@ The exercise intentionally builds one product workflow:
 2. Build a shared context library.
 3. Install `web-design-reviewer` for a future review agent.
 4. Design component, test, and review agent responsibilities.
-5. Create the three repository-level agents.
+5. Create the three repository-level agents in `.agents/`.
 6. Invoke the agents directly, then use `/fleet` to build the Favorites feature and `/orchestrate` to write release notes for it.
 7. Reflect on reusable parts and human decisions.
 
@@ -21,10 +21,10 @@ The exercise intentionally builds one product workflow:
 ```text
 .github/ISSUE_TEMPLATE/ai-workforce-start.md
 .github/ISSUE_TEMPLATE/favorites-feature-request.md
-.github/steps/ai-workforce-0-welcome.md
-.github/steps/ai-workforce-2-step.md through ai-workforce-7-step.md
+.github/steps/ai-workforce-1-step.md through ai-workforce-7-step.md
 .github/steps/ai-workforce-completion.md
-.github/workflows/ai-workforce-0-start.yml through ai-workforce-7-step.yml
+.github/workflows/ai-workforce-1-start.yml
+.github/workflows/ai-workforce-1-step.yml through ai-workforce-7-step.yml
 scripts/ai-workforce-helpers.js
 ```
 
@@ -38,7 +38,7 @@ Every step workflow uses the standard `find_exercise`, `check_step_work`, and `p
 | 2 | `Context PR: #N` | Three scoped custom instruction files with repository-specific references |
 | 3 | `Skill PR: #N` | `.github/skills/web-design-reviewer/SKILL.md` exists in the PR |
 | 4 | Structured comment | Component, test, and review sections each include `Input:` and `Output:` |
-| 5 | `Agents PR: #N` | Three required agent files exist and the review agent references `web-design-reviewer` |
+| 5 | `Agents PR: #N` | Three required `.agents/` files exist and the review agent references `web-design-reviewer` |
 | 6 | `Favorites PR: #N` | Comment mentions `/fleet` and `/orchestrate`; learner-owned PR changes Favorites files |
 | 7 | Reflection comment | Agent contributions, human decision, future feature, and reusable workflow parts |
 

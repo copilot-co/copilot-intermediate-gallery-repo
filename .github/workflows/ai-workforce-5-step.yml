@@ -46,13 +46,13 @@ jobs:
             try {
               const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber })).data;
               const required = [
-                '.github/agents/component.agent.md',
-                '.github/agents/test.agent.md',
-                '.github/agents/review.agent.md',
+                '.agents/component.agent.md',
+                '.agents/test.agent.md',
+                '.agents/review.agent.md',
               ];
               const present = required.filter((path) =>
                 files.some((file) => file.filename === path && file.status !== 'removed'));
-              const reviewFile = files.find((file) => file.filename === '.github/agents/review.agent.md');
+              const reviewFile = files.find((file) => file.filename === '.agents/review.agent.md');
               const usesSkill = /web-design-reviewer/i.test(reviewFile?.patch || '');
               const passed = present.length === required.length && usesSkill;
               if (!passed) {

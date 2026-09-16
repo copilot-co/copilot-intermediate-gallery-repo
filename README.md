@@ -41,7 +41,7 @@ After finishing the demo, don't forget this quick follow-up:
 
 ## AI-Native Workforce Exercise
 
-This guided exercise is for developers who want to design a product workflow around collaboration between people and agents. In about 60 minutes, you will use the GitHub Copilot app to build shared context, add a visual review skill, create focused agents, orchestrate their work, and produce a Favorites feature pull request.
+This guided exercise is for developers who want to design a product workflow around collaboration between people and agents. In about 60 minutes, you will use the GitHub Copilot app to build shared context, add a visual review skill, create focused agents in `.agents/`, orchestrate their work, and produce a Favorites feature pull request.
 
 ### Prerequisites
 

@@ -25,4 +25,4 @@ Output: ...
 ```
 
 > [!TIP]
-> Keep each responsibility focused. The orchestration step will be easier when every agent has a clear input and output.
+> Use the GitHub Copilot app to draft your team design. Ask it to turn the role descriptions into focused inputs and outputs, then edit the response so it matches how you want people and agents to work together.

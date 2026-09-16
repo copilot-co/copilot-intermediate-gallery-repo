@@ -42,13 +42,22 @@ function checkAgentRoleSections(markdown, { requireInputOutput = false } = {}) {
 }
 
 function checkReflection(text) {
+  const agentWork = getSection(text, "Agent work");
+  const humanDecision = getSection(text, "Human decision");
+  const futureFeature = getSection(text, "Future feature");
+
   return {
-    hasWorkforceWins: base.countListItems(text) >= 2 || /handled|did|automat/i.test(text),
-    hasHumanDecision: /\b(I|we)\s+(decided|chose|had to decide|approved|rejected)/i.test(text) ||
-      /human[\s-]?(only|decision)/i.test(text),
-    hasFutureFeature: /(next|future|another)\s+feature/i.test(text),
-    hasReusableParts: ["context", "skill", "agent", "orchestrat"]
-      .filter((part) => new RegExp(part, "i").test(text)).length >= 2,
+    hasWorkforceWins: Boolean(agentWork) &&
+      (base.countListItems(agentWork) >= 2 || /handled|did|automat/i.test(agentWork)),
+    hasHumanDecision: Boolean(humanDecision) &&
+      (/\b(I|we)\s+(decided|chose|had to decide|approved|rejected)/i.test(humanDecision) ||
+        /human[\s-]?(only|decision)/i.test(humanDecision)),
+    hasFutureFeature: Boolean(futureFeature) &&
+      (/(next|future|another)\s+feature/i.test(futureFeature) || /feature idea\s*:/i.test(futureFeature)),
+    hasReusableParts: Boolean(futureFeature) &&
+      ["context", "skill", "agent", "orchestrat"]
+        .filter((part) => new RegExp(part, "i").test(futureFeature)).length >= 2,
+    hasRequiredSections: Boolean(agentWork && humanDecision && futureFeature),
   };
 }
 
