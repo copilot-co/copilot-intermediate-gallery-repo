@@ -23,22 +23,7 @@ Your agents are ready. Call them directly, then coordinate them for two differen
    ```
 
 4. Add the changes to your existing pull request from Step 2.
-5. In the pull request body, include:
-
-   ```markdown
-   ## Agents used
-   Component agent: ...
-   Test agent: ...
-   Review agent: ...
-
-   ## Release notes
-   ...
-
-   ## Human decision
-   ...
-   ```
-
-6. Comment `Favorites PR: #<number>` on this issue, noting that you used both `/fleet` and `/orchestrate`.
+5. Comment `Favorites PR: #<number>` on this issue, noting that you used both `/fleet` and `/orchestrate`.
 
 > [!TIP]
 > `/fleet` launches agents in parallel on one task, which fits building the feature together. `/orchestrate` coordinates related work across a broader task, which fits turning that same work into release documentation.

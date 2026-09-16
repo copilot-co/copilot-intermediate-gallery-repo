@@ -41,22 +41,6 @@ function checkAgentRoleSections(markdown, { requireInputOutput = false } = {}) {
   };
 }
 
-/**
- * Check the "## Agents used" section for a non-empty description of each
- * role, written as `Component agent: ...` / `Test agent: ...` /
- * `Review agent: ...` lines rather than separate sub-headings.
- */
-function checkAgentUsageList(markdown) {
-  const section = getSection(markdown, "Agents used") || "";
-  const roles = ["Component agent", "Test agent", "Review agent"];
-  const present = roles.filter((role) => {
-    const escaped = role.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = section.match(new RegExp(`${escaped}\\s*:\\s*(.+)`, "i"));
-    return Boolean(match && match[1].trim());
-  });
-  return { present, passes: present.length === roles.length };
-}
-
 function checkReflection(text) {
   return {
     hasWorkforceWins: base.countListItems(text) >= 2 || /handled|did|automat/i.test(text),
@@ -74,6 +58,5 @@ module.exports = {
   countMatchingFiles,
   getSection,
   checkAgentRoleSections,
-  checkAgentUsageList,
   checkReflection,
 };

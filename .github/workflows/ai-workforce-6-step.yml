@@ -50,19 +50,14 @@ jobs:
             try {
               const pr = (await github.rest.pulls.get({ ...context.repo, pull_number: prNumber })).data;
               const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber })).data;
-              const body = pr.body || '';
               const isLearnerPr = pr.user.login === context.payload.issue.user.login;
               const hasFavoritesChange = files.some((file) =>
                 /favorite/i.test(file.filename) || /favorite/i.test(file.patch || ''));
-              const agentUsage = helpers.checkAgentUsageList(body);
-              const hasReleaseNotes = Boolean(helpers.getSection(body, 'Release notes'));
-              const hasHumanDecision = Boolean(helpers.getSection(body, 'Human decision'));
-              const passed = usedFleet && usedOrchestrate && isLearnerPr &&
-                hasFavoritesChange && agentUsage.passes && hasReleaseNotes && hasHumanDecision;
+              const passed = usedFleet && usedOrchestrate && isLearnerPr && hasFavoritesChange;
 
               if (!passed) {
                 await helpers.postComment(github, context, context.issue.number,
-                  `Check: mentioned /fleet = ${usedFleet}, mentioned /orchestrate = ${usedOrchestrate}, learner-owned PR = ${isLearnerPr}, Favorites change = ${hasFavoritesChange}, agents used (${agentUsage.present.length}/3) = ${agentUsage.passes}, release notes = ${hasReleaseNotes}, human decision = ${hasHumanDecision}. Update the code, PR body, or comment, then try again.`);
+                  `Check: mentioned /fleet = ${usedFleet}, mentioned /orchestrate = ${usedOrchestrate}, learner-owned PR = ${isLearnerPr}, Favorites change = ${hasFavoritesChange}. Update the code or comment, then try again.`);
               }
               core.setOutput('passed', String(passed));
             } catch (error) {

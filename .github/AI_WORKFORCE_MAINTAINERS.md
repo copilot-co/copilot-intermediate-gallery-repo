@@ -39,7 +39,7 @@ Every step workflow uses the standard `find_exercise`, `check_step_work`, and `p
 | 3 | `Skill PR: #N` | `.github/skills/web-design-reviewer/SKILL.md` exists in the PR |
 | 4 | Structured comment | Component, test, and review sections each include `Input:` and `Output:` |
 | 5 | `Agents PR: #N` | Three required agent files exist and the review agent references `web-design-reviewer` |
-| 6 | `Favorites PR: #N` | Comment mentions `/fleet` and `/orchestrate`; learner-owned PR changes Favorites and documents all three agents, release notes, and a human decision |
+| 6 | `Favorites PR: #N` | Comment mentions `/fleet` and `/orchestrate`; learner-owned PR changes Favorites files |
 | 7 | Reflection comment | Agent contributions, human decision, future feature, and reusable workflow parts |
 
 PR-based checks may reuse one pull request across several steps. Files are evaluated against the full pull request diff from its base branch.
@@ -64,15 +64,13 @@ actionlint .github/workflows/ai-workforce-*.yml
 node -e "require('./scripts/ai-workforce-helpers.js')"
 ```
 
-Smoke-test the structured comment and agent-usage helpers:
+Smoke-test the structured comment helper:
 
 ```bash
 node <<'NODE'
 const h = require('./scripts/ai-workforce-helpers.js');
 const roles = '## Component agent\nInput: ticket\nOutput: code\n## Test agent\nInput: criteria\nOutput: checks\n## Review agent\nInput: UI\nOutput: findings';
 console.log(h.checkAgentRoleSections(roles, { requireInputOutput: true }));
-const prBody = '## Agents used\nComponent agent: built the toggle\nTest agent: added coverage\nReview agent: checked contrast\n\n## Release notes\nAdded favorites\n\n## Human decision\nKept state client-side';
-console.log(h.checkAgentUsageList(prBody));
 NODE
 ```
 
@@ -84,4 +82,4 @@ Learners can retry by posting a new comment while the issue remains on the same 
 
 ## Limitations
 
-GitHub Actions cannot inspect private GitHub Copilot app session history. Step 6 therefore grades the durable pull request code and description (agents used, release notes, human decision) rather than attempting to prove which app session produced each change.
+GitHub Actions cannot inspect private GitHub Copilot app session history. Step 6 therefore grades the durable pull request code (the Favorites file changes) and the learner's comment for command usage, rather than attempting to prove which app session produced each change.
