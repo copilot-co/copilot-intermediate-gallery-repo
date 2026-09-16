@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 6: Parallel subagents"
+name: "AI Workforce - Step 6: Invoke the agents"
 
 on:
   issue_comment:
@@ -6,7 +6,6 @@ on:
 
 permissions:
   issues: write
-  pull-requests: read
   contents: read
 
 jobs:
@@ -18,20 +17,9 @@ jobs:
       github.event.comment.user.login == github.event.issue.user.login
     runs-on: ubuntu-latest
     outputs:
-      found: ${{ steps.find.outputs.found }}
-      pr_number: ${{ steps.find.outputs.pr_number }}
+      found: "true"
     steps:
-      - id: find
-        env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
-        run: |
-          NUM=$(echo "$COMMENT_BODY" | grep -ioE 'Workforce PR:\s*#[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
-          if [ -n "$NUM" ]; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "pr_number=$NUM" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
+      - run: echo "Tracking issue ${{ github.event.issue.number }} is at that step."
 
   check_step_work:
     needs: find_exercise
@@ -46,32 +34,13 @@ jobs:
         with:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
-            let pr, commits, comments;
-            try {
-              pr = (await github.rest.pulls.get({ ...context.repo, pull_number: prNumber })).data;
-              commits = (await github.rest.pulls.listCommits({ ...context.repo, pull_number: prNumber })).data;
-              comments = (await github.rest.issues.listComments({ ...context.repo, issue_number: prNumber })).data;
-            } catch (e) {
-              await helpers.postComment(github, context, context.issue.number,
-                `I couldn't find PR #${prNumber} — double check the number and comment again.`);
-              core.setOutput('passed', 'false');
-              return;
-            }
-
-            const roles = ['component', 'tests?', 'docs?'];
-            const commitText = commits.map((c) => c.commit.message).join('\n');
-            const commentText = [pr.body || '', ...comments.map((c) => c.body || '')].join('\n');
-            const combined = `${commitText}\n${commentText}`;
-            const subagentMentions = helpers.countSubagentMentions(combined, roles);
-
-            const hasResult = comments.some((c) => /pass|fail|✅|❌/i.test(c.body || ''));
-
-            const passed = subagentMentions >= 2 && hasResult;
-
+            const body = context.payload.comment.body || '';
+            const check = helpers.checkAgentRoleSections(body);
+            const hasMarker = /agents\s+invoked/i.test(body);
+            const passed = hasMarker && check.passes;
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `PR #${prNumber}: found ${subagentMentions}/3 subagent role mention(s) (component/tests/docs) and test-result comment present = ${hasResult}. Make sure commits/comments attribute work to at least 2 subagents, and the reactive testing agent has posted a pass/fail result.`);
+                `I found the \`Agents invoked\` marker = ${hasMarker} and ${check.present.length}/3 recommendation sections. Summarize the component, test, and review agent responses using the requested format.`);
             }
             core.setOutput('passed', String(passed));
 

@@ -36,11 +36,11 @@ jobs:
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
             const body = context.payload.comment.body || '';
             const r = helpers.checkReflection(body);
-            const passed = r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature;
+            const passed = r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature && r.hasReusableParts;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `Your reflection needs all three: what the workforce handled (found: ${r.hasWorkforceWins}), a decision only you made (found: ${r.hasHumanDecision}), and a different future feature naming which pillars carry over (found: ${r.hasFutureFeature}). Add whichever is missing and comment again.`);
+                `Reflection check: agent work = ${r.hasWorkforceWins}, human decision = ${r.hasHumanDecision}, future feature = ${r.hasFutureFeature}, reusable context/skill/agents/orchestration = ${r.hasReusableParts}. Add what is missing and comment again.`);
             }
             core.setOutput('passed', String(passed));
 

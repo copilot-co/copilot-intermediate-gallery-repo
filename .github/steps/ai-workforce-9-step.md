@@ -1,10 +1,10 @@
 ## Step 9: Reflect
 
-Last step. Comment on this issue with:
+Comment on this issue with:
 
-1. At least 2 things your workforce handled without you doing the manual work.
-2. At least 1 decision that only you (the human) could make — something the workforce couldn't or shouldn't decide for you.
-3. A different, hypothetical **future** feature (not Favorites), naming which of the 4 pillars (context, skill, integration, agents) would carry over **unchanged**.
+1. At least 2 things the agent workflow handled for you.
+2. At least 1 decision that required your direction or approval.
+3. A different future feature, not Favorites, and which parts of the context, skill, agents, and orchestration could be reused unchanged.
 
 > [!NOTE]
-> This is the "workforce, not replacement" model made explicit — agents executed, you still directed and decided.
+> The goal is not to remove people from product development. It is to create a repeatable workflow in which agents execute focused work and people direct the outcome.

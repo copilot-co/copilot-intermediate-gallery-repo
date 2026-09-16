@@ -1,11 +1,15 @@
-## Step 5: Stand up a proactive agent
+## Step 5: Create the agents
 
-Now build an agent that surfaces work **before** you ask for it.
+Turn your team design into repository-level custom agents.
 
-1. Create `.github/agents/proactive-feedback.agent.md` describing an agent that scans open issues/requests and ranks them by priority.
-2. Create a matching workflow (e.g. `.github/workflows/proactive-feedback.yml`) that runs the agent **on a daily schedule** — include an `on: schedule: - cron: '<minute> <hour> * * *'` trigger (once per day).
-3. Make sure the agent's expected output includes an explicit priority ranking (e.g. "1. ... 2. ... 3. ...").
-4. Open a pull request with both files and comment `Proactive PR: #<number>` on this issue.
+1. In the GitHub Copilot app, create these agent profiles:
+   - `.github/agents/component.agent.md`
+   - `.github/agents/test.agent.md`
+   - `.github/agents/review.agent.md`
+2. Give each agent a focused `name`, `description`, and prompt that match the responsibility you defined in Step 4.
+3. In the review agent's prompt, tell it to use the `web-design-reviewer` skill when evaluating interface changes.
+4. Add the agent files to your existing pull request, or open a new pull request.
+5. Comment `Agents PR: #<number>` on this issue.
 
 > [!NOTE]
-> "Proactive" here specifically means schedule-triggered, not chat-invoked — the daily cron is what the bot checks for.
+> Repository-level agents are discovered from `.github/agents/`. Their descriptions help Copilot select the right specialist for a task.

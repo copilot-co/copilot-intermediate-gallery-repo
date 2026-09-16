@@ -1,14 +1,29 @@
-## Step 6: Stand up a reactive coding agent that fans out to parallel subagents
+## Step 6: Invoke the agents
 
-Time to put a loop to work with parallel subagents underneath it.
+Confirm that each specialist can be called directly before coordinating them as a team.
 
-1. Create an orchestrating agent (`.github/agents/coding-agent.agent.md`) that, given a ticket, dispatches **parallel subagents** for distinct pieces of the same task — for example:
-   - `.github/agents/subagent-component.agent.md` — writes the component/feature code.
-   - `.github/agents/subagent-tests.agent.md` — writes tests.
-   - `.github/agents/subagent-docs.agent.md` — updates docs.
-2. Reconcile their output into a single draft pull request. Make sure the PR shows evidence of at least 2 of the subagents' contributions (e.g. separate commits or PR comments attributable to each).
-3. Add a reactive testing agent/workflow (`.github/workflows/reactive-testing.yml`) that runs automatically on that PR and posts a pass/fail result (a check run or comment).
-4. Comment `Workforce PR: #<number>` on this issue once the PR and its test result both exist.
+1. In an active GitHub Copilot app session, ask each agent to inspect the Favorites feature request without changing files. You can call an agent naturally, for example:
 
-> [!TIP]
-> This is "one loop, parallel subagents" — the stepping stone to the full agent *graph* you'll design in Step 7.
+   ```text
+   Use the component agent to inspect the Favorites feature request and recommend an implementation approach.
+   ```
+
+   You can also use `/agent` to select a custom agent explicitly.
+2. Ask the component, test, and review agents for a recommendation from their area of responsibility.
+3. Summarize their responses in a comment using this structure:
+
+```markdown
+Agents invoked
+
+## Component agent
+...
+
+## Test agent
+...
+
+## Review agent
+...
+```
+
+> [!IMPORTANT]
+> Do not implement Favorites yet. This step verifies that the agents are discoverable and that their responsibilities are distinct.

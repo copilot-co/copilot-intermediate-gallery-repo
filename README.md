@@ -39,6 +39,24 @@ After finishing the demo, don't forget this quick follow-up:
 
 1. Add in the overview, key skills, and demo link to the [demo README](demos/README.md)
 
+## AI-Native Workforce Exercise
+
+This guided exercise is for developers who want to design a product workflow around collaboration between people and agents. In about 60 minutes, you will use the GitHub Copilot app to build shared context, add a visual review skill, create focused agents, orchestrate their work, and produce a Favorites feature pull request.
+
+### Prerequisites
+
+- A GitHub account with access to this repository.
+- The [GitHub Copilot app](https://github.com/features/ai/github-app) installed and enabled by your organization.
+- Permission to create issues, branches, and pull requests.
+
+### Start
+
+1. Open a new issue using the **AI-Native Workforce Exercise: Start** template.
+2. Wait for the welcome comment.
+3. Complete each task in the tracking issue and post the requested response to advance.
+
+If a check does not pass, make the requested change and comment again. To restart from an earlier step, ask a maintainer to replace the issue's current `step-N` label with the desired step label.
+
 ## Getting Started
 
 ### Technical Requirements

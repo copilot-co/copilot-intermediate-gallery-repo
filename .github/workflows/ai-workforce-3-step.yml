@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 3: Adopt a skill"
+name: "AI Workforce - Step 3: Visual review skill"
 
 on:
   issue_comment:
@@ -6,6 +6,7 @@ on:
 
 permissions:
   issues: write
+  pull-requests: read
   contents: read
 
 jobs:
@@ -17,9 +18,16 @@ jobs:
       github.event.comment.user.login == github.event.issue.user.login
     runs-on: ubuntu-latest
     outputs:
-      found: "true"
+      found: ${{ steps.find.outputs.found }}
+      pr_number: ${{ steps.find.outputs.pr_number }}
     steps:
-      - run: echo "Tracking issue ${{ github.event.issue.number }} is at that step."
+      - id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const match = (context.payload.comment.body || '').match(/Skill PR:\s*#(\d+)/i);
+            core.setOutput('found', String(Boolean(match)));
+            if (match) core.setOutput('pr_number', match[1]);
 
   check_step_work:
     needs: find_exercise
@@ -34,13 +42,21 @@ jobs:
         with:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const body = context.payload.comment.body || '';
-            const passed = helpers.hasSkillDecisionWithRationale(body);
-            if (!passed) {
+            const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
+            try {
+              const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber })).data;
+              const passed = files.some((file) =>
+                file.filename === '.github/skills/web-design-reviewer/SKILL.md' && file.status !== 'removed');
+              if (!passed) {
+                await helpers.postComment(github, context, context.issue.number,
+                  `PR #${prNumber} does not add \`.github/skills/web-design-reviewer/SKILL.md\`. Install the skill in the repository, push the change, and comment \`Skill PR: #${prNumber}\` again.`);
+              }
+              core.setOutput('passed', String(passed));
+            } catch (error) {
               await helpers.postComment(github, context, context.issue.number,
-                `I need a specific skill decision: name the skill from \`/suggest-awesome-github-copilot-skills\`, say whether you're adopting or rejecting it, and give a short reason why.`);
+                `I couldn't find PR #${prNumber}. Check the number and comment again.`);
+              core.setOutput('passed', 'false');
             }
-            core.setOutput('passed', String(passed));
 
   post_next_step_content:
     needs: [find_exercise, check_step_work]
