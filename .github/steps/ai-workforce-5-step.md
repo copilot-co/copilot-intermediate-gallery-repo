@@ -8,7 +8,7 @@ Turn your team design into repository-level custom agents.
    - `.github/agents/review.agent.md`
 2. Give each agent a focused `name`, `description`, and prompt that match the responsibility you defined in Step 4.
 3. In the review agent's prompt, tell it to use the `web-design-reviewer` skill when evaluating interface changes.
-4. Add the agent files to your existing pull request, or open a new pull request.
+4. Add the agent files to your existing pull request from Step 2.
 5. Comment `Agents PR: #<number>` on this issue.
 
 > [!NOTE]

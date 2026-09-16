@@ -1,6 +1,6 @@
 ---
 name: "AI-Native Workforce Exercise: Start"
-about: Start the AI-Native Workforce Workflow exercise. This issue tracks your progress through all 9 steps.
+about: Start the AI-Native Workforce Workflow exercise. This issue tracks your progress through all 7 steps.
 title: "AI-native workforce: build the product workflow"
 labels: ["ai-workforce", "step-1"]
 ---

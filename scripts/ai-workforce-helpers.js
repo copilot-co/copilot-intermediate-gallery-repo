@@ -41,35 +41,20 @@ function checkAgentRoleSections(markdown, { requireInputOutput = false } = {}) {
   };
 }
 
-function extractMermaidBlock(markdown) {
-  if (!markdown) return null;
-  const match = markdown.match(/```mermaid\n([\s\S]*?)```/);
-  return match ? match[1] : null;
-}
-
-function checkMermaidGraph(mermaidBody, { minNodes = 3 } = {}) {
-  const result = { nodeCount: 0, hasFanOut: false, hasEscalation: false };
-  if (!mermaidBody) return result;
-
-  const edgePattern = /([A-Za-z0-9_]+)\s*(?:-->|--[^-\n>]*-->)\s*(?:\|[^|\n]*\|\s*)?([A-Za-z0-9_]+)/g;
-  const nodes = new Set();
-  const outEdges = {};
-  let match;
-  while ((match = edgePattern.exec(mermaidBody))) {
-    const [, from, to] = match;
-    nodes.add(from);
-    nodes.add(to);
-    outEdges[from] = (outEdges[from] || 0) + 1;
-  }
-
-  result.nodeCount = nodes.size;
-  result.hasFanOut = Object.values(outEdges).some((count) => count >= 2);
-  result.hasEscalation = /escalat|human|approv|low[\s-]?confidence|fail/i.test(
-    mermaidBody
-  );
-  result.passes = result.nodeCount >= minNodes &&
-    result.hasFanOut && result.hasEscalation;
-  return result;
+/**
+ * Check the "## Agents used" section for a non-empty description of each
+ * role, written as `Component agent: ...` / `Test agent: ...` /
+ * `Review agent: ...` lines rather than separate sub-headings.
+ */
+function checkAgentUsageList(markdown) {
+  const section = getSection(markdown, "Agents used") || "";
+  const roles = ["Component agent", "Test agent", "Review agent"];
+  const present = roles.filter((role) => {
+    const escaped = role.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = section.match(new RegExp(`${escaped}\\s*:\\s*(.+)`, "i"));
+    return Boolean(match && match[1].trim());
+  });
+  return { present, passes: present.length === roles.length };
 }
 
 function checkReflection(text) {
@@ -89,7 +74,6 @@ module.exports = {
   countMatchingFiles,
   getSection,
   checkAgentRoleSections,
-  extractMermaidBlock,
-  checkMermaidGraph,
+  checkAgentUsageList,
   checkReflection,
 };

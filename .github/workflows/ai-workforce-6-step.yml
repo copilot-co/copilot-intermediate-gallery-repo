@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 6: Invoke the agents"
+name: "AI Workforce - Step 6: Invoke and orchestrate the agents"
 
 on:
   issue_comment:
@@ -6,6 +6,7 @@ on:
 
 permissions:
   issues: write
+  pull-requests: read
   contents: read
 
 jobs:
@@ -17,9 +18,16 @@ jobs:
       github.event.comment.user.login == github.event.issue.user.login
     runs-on: ubuntu-latest
     outputs:
-      found: "true"
+      found: ${{ steps.find.outputs.found }}
+      pr_number: ${{ steps.find.outputs.pr_number }}
     steps:
-      - run: echo "Tracking issue ${{ github.event.issue.number }} is at that step."
+      - id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const match = (context.payload.comment.body || '').match(/Favorites PR:\s*#(\d+)/i);
+            core.setOutput('found', String(Boolean(match)));
+            if (match) core.setOutput('pr_number', match[1]);
 
   check_step_work:
     needs: find_exercise
@@ -34,15 +42,34 @@ jobs:
         with:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const body = context.payload.comment.body || '';
-            const check = helpers.checkAgentRoleSections(body);
-            const hasMarker = /agents\s+invoked/i.test(body);
-            const passed = hasMarker && check.passes;
-            if (!passed) {
+            const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
+            const commentBody = context.payload.comment.body || '';
+            const usedFleet = /\/fleet\b/i.test(commentBody);
+            const usedOrchestrate = /\/orchestrate\b/i.test(commentBody);
+
+            try {
+              const pr = (await github.rest.pulls.get({ ...context.repo, pull_number: prNumber })).data;
+              const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber })).data;
+              const body = pr.body || '';
+              const isLearnerPr = pr.user.login === context.payload.issue.user.login;
+              const hasFavoritesChange = files.some((file) =>
+                /favorite/i.test(file.filename) || /favorite/i.test(file.patch || ''));
+              const agentUsage = helpers.checkAgentUsageList(body);
+              const hasReleaseNotes = Boolean(helpers.getSection(body, 'Release notes'));
+              const hasHumanDecision = Boolean(helpers.getSection(body, 'Human decision'));
+              const passed = usedFleet && usedOrchestrate && isLearnerPr &&
+                hasFavoritesChange && agentUsage.passes && hasReleaseNotes && hasHumanDecision;
+
+              if (!passed) {
+                await helpers.postComment(github, context, context.issue.number,
+                  `Check: mentioned /fleet = ${usedFleet}, mentioned /orchestrate = ${usedOrchestrate}, learner-owned PR = ${isLearnerPr}, Favorites change = ${hasFavoritesChange}, agents used (${agentUsage.present.length}/3) = ${agentUsage.passes}, release notes = ${hasReleaseNotes}, human decision = ${hasHumanDecision}. Update the code, PR body, or comment, then try again.`);
+              }
+              core.setOutput('passed', String(passed));
+            } catch (error) {
               await helpers.postComment(github, context, context.issue.number,
-                `I found the \`Agents invoked\` marker = ${hasMarker} and ${check.present.length}/3 recommendation sections. Summarize the component, test, and review agent responses using the requested format.`);
+                `I couldn't find PR #${prNumber}. Check the number and comment again once it is open.`);
+              core.setOutput('passed', 'false');
             }
-            core.setOutput('passed', String(passed));
 
   post_next_step_content:
     needs: [find_exercise, check_step_work]
@@ -55,6 +82,8 @@ jobs:
           script: |
             const fs = require('fs');
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
+            const prNumber = '${{ needs.find_exercise.outputs.pr_number }}';
+            await helpers.addLabels(github, context, context.issue.number, [`favorites-pr-${prNumber}`]);
             const body = fs.readFileSync('.github/steps/ai-workforce-7-step.md', 'utf8');
             await helpers.postComment(github, context, context.issue.number, body);
             await helpers.swapLabel(github, context, context.issue.number, 'step-6', 'step-7');

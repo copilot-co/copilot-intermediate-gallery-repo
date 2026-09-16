@@ -1,29 +1,44 @@
-## Step 6: Invoke the agents
+## Step 6: Invoke and orchestrate the agents
 
-Confirm that each specialist can be called directly before coordinating them as a team.
+Your agents are ready. Call them directly, then coordinate them for two different jobs: building the feature, and documenting it.
 
-1. In an active GitHub Copilot app session, ask each agent to inspect the Favorites feature request without changing files. You can call an agent naturally, for example:
+1. Call each agent directly by name. No slash command is required:
 
    ```text
-   Use the component agent to inspect the Favorites feature request and recommend an implementation approach.
+   component, inspect the Favorites feature request and outline your implementation approach.
    ```
 
-   You can also use `/agent` to select a custom agent explicitly.
-2. Ask the component, test, and review agents for a recommendation from their area of responsibility.
-3. Summarize their responses in a comment using this structure:
+   Do the same for `test` and `review` to confirm each agent responds from its own area of responsibility.
 
-```markdown
-Agents invoked
+2. Use `/fleet` to have the component, test, and review agents build the [`Favorites feature request`](../ISSUE_TEMPLATE/favorites-feature-request.md) together in parallel:
 
-## Component agent
-...
+   ```text
+   /fleet Build the Favorites feature using the component, test, and review agents.
+   ```
 
-## Test agent
-...
+3. Once the feature is implemented, use `/orchestrate` to have the same three agents produce release notes for it:
 
-## Review agent
-...
-```
+   ```text
+   /orchestrate Using the component, test, and review agents, write release notes for the Favorites feature covering what changed, how it was tested, and what was reviewed.
+   ```
 
-> [!IMPORTANT]
-> Do not implement Favorites yet. This step verifies that the agents are discoverable and that their responsibilities are distinct.
+4. Add the changes to your existing pull request from Step 2.
+5. In the pull request body, include:
+
+   ```markdown
+   ## Agents used
+   Component agent: ...
+   Test agent: ...
+   Review agent: ...
+
+   ## Release notes
+   ...
+
+   ## Human decision
+   ...
+   ```
+
+6. Comment `Favorites PR: #<number>` on this issue, noting that you used both `/fleet` and `/orchestrate`.
+
+> [!TIP]
+> `/fleet` launches agents in parallel on one task, which fits building the feature together. `/orchestrate` coordinates related work across a broader task, which fits turning that same work into release documentation.

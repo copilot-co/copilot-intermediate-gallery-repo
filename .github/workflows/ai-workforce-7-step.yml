@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 7: Orchestrate the agents"
+name: "AI Workforce - Step 7: Reflect"
 
 on:
   issue_comment:
@@ -35,14 +35,12 @@ jobs:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
             const body = context.payload.comment.body || '';
-            const command = body.match(/\/(fleet|orchestrate)\b/i)?.[1] || null;
-            const graph = helpers.checkMermaidGraph(helpers.extractMermaidBlock(body), { minNodes: 5 });
-            const roles = ['component', 'test', 'review'];
-            const roleCount = roles.filter((role) => new RegExp(role, 'i').test(body)).length;
-            const passed = Boolean(command) && graph.passes && roleCount === roles.length;
+            const r = helpers.checkReflection(body);
+            const passed = r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature && r.hasReusableParts;
+
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `Orchestration check: command = ${command || 'missing'}, nodes = ${graph.nodeCount}/5, fan-out = ${graph.hasFanOut}, human review = ${graph.hasEscalation}, agent roles = ${roleCount}/3. Include \`/fleet\` or \`/orchestrate\` and a Mermaid diagram with all required elements.`);
+                `Reflection check: agent work = ${r.hasWorkforceWins}, human decision = ${r.hasHumanDecision}, future feature = ${r.hasFutureFeature}, reusable context/skill/agents/orchestration = ${r.hasReusableParts}. Add what is missing and comment again.`);
             }
             core.setOutput('passed', String(passed));
 
@@ -57,6 +55,7 @@ jobs:
           script: |
             const fs = require('fs');
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const body = fs.readFileSync('.github/steps/ai-workforce-8-step.md', 'utf8');
+            const body = fs.readFileSync('.github/steps/ai-workforce-completion.md', 'utf8');
             await helpers.postComment(github, context, context.issue.number, body);
-            await helpers.swapLabel(github, context, context.issue.number, 'step-7', 'step-8');
+            await helpers.swapLabel(github, context, context.issue.number, 'step-7', 'completed');
+            await github.rest.issues.update({ ...context.repo, issue_number: context.issue.number, state: 'closed' });

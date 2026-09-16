@@ -10,7 +10,7 @@ Your context library explains how this repository works. Now add a specialized c
 
 2. Confirm that `.github/skills/web-design-reviewer/SKILL.md` was added to the repository.
 3. Read the skill description and identify the visual, responsive, and accessibility checks it provides.
-4. Add the skill to your existing pull request, or open a new pull request.
+4. Add the skill to your existing pull request from Step 2.
 5. Comment `Skill PR: #<number>` on this issue.
 
 > [!NOTE]
