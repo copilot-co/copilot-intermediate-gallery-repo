@@ -1,4 +1,4 @@
-name: "AI Workforce - Start"
+name: "AI Workforce - Step 1: Start"
 
 on:
   issues:
@@ -20,7 +20,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const body = fs.readFileSync('.github/steps/ai-workforce-0-welcome.md', 'utf8');
+            const body = fs.readFileSync('.github/steps/ai-workforce-1-step.md', 'utf8');
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: context.issue.number,

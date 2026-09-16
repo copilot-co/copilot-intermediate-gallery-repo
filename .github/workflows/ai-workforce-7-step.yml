@@ -36,11 +36,11 @@ jobs:
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
             const body = context.payload.comment.body || '';
             const r = helpers.checkReflection(body);
-            const passed = r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature && r.hasReusableParts;
+            const passed = r.hasRequiredSections && r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature && r.hasReusableParts;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `Reflection check: agent work = ${r.hasWorkforceWins}, human decision = ${r.hasHumanDecision}, future feature = ${r.hasFutureFeature}, reusable context/skill/agents/orchestration = ${r.hasReusableParts}. Add what is missing and comment again.`);
+                `Reflection check: required sections = ${r.hasRequiredSections}, agent work = ${r.hasWorkforceWins}, human decision = ${r.hasHumanDecision}, future feature = ${r.hasFutureFeature}, reusable context/skill/agents/orchestration = ${r.hasReusableParts}. Use the Step 7 format with Agent work, Human decision, and Future feature sections, then comment again.`);
             }
             core.setOutput('passed', String(passed));
 
