@@ -1,16 +1,23 @@
 ---
 name: Favorites feature request
-about: The traditional, under-specified feature ticket used to start the Agentic Workflow Redesign demo
+about: Product task used to prove the AI-Native Workforce exercise
 title: "Add favorites to the photo gallery"
 labels: enhancement
 ---
 
-## Request
+## Goal
 
-Users should be able to mark photos as favorites and view a page containing their favorite photos.
+Let people mark photos as favorites and focus the gallery on the photos they selected.
 
-## Notes
+## Acceptance criteria
 
-Not much else here yet — this is intentionally a quick, "typical" ticket the way requests often arrive in practice.
+- A person can add or remove a photo from Favorites from the gallery.
+- The favorite control has an accessible name and a clear selected state.
+- A person can view only their favorite photos.
+- The Favorites view includes a useful empty state when no photos are selected.
+- The experience works across responsive layouts and supports the existing dark theme.
+- Favorite state may remain client-side for this exercise. Persistence across browsers or devices is not required.
 
-If you're doing the [Agentic Workflow Redesign demo](https://github.com/copilot-co/copilot-intermediate-gallery-repo/blob/main/demos/agentic-workflow-redesign.md), don't file this as-is for your Step 3 spec issue. Instead, use it as your starting point and expand it with what Step 3 requires: a `Tracking issue: #<N>` line, references to real files/conventions, an `## Acceptance Criteria` section (3+ bullets), and a `## Non-goals` section.
+## Workflow evidence
+
+The pull request should describe how the component, test, and review agents contributed and identify at least one decision made by the learner.

@@ -51,7 +51,7 @@ jobs:
               files = res.data;
             } catch (e) {
               await helpers.postComment(github, context, context.issue.number,
-                `I couldn't find PR #${prNumber} — double check the number and comment again.`);
+                `I couldn't find PR #${prNumber}: double check the number and comment again.`);
               core.setOutput('passed', 'false');
               return;
             }

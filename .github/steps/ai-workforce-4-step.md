@@ -1,10 +1,28 @@
-## Step 4: Simulate an integration
+## Step 4: Design the agent team
 
-Skill adopted — now show your workforce reaching outside the repo, without needing real credentials.
+Before creating agents, define the responsibilities and handoffs needed to produce the feature.
 
-1. Add a workflow step (or script) that **mocks** an outbound integration — format a Slack/Teams-style message and write it to `mock-integration-output.json` or a PR comment, instead of calling a real webhook.
-2. Include a `> [!NOTE]` in the same file/comment explaining that in production this step would `POST` to a real Slack/Teams webhook, and what you'd swap in to make that real.
-3. Open (or reuse) a pull request containing this mock, and comment `Integration PR: #<number>` on this issue.
+Plan these three roles:
 
-> [!IMPORTANT]
-> No real webhook URL or credentials are needed for this exercise — the mock output is the whole point of this step.
+- **Component agent** implements the user interface and feature behavior.
+- **Test agent** identifies expected behavior, edge cases, and the validation needed before review.
+- **Review agent** uses the `web-design-reviewer` skill to inspect the finished interface.
+
+Comment on this issue using this structure. Describe the input each agent receives and the output it returns.
+
+```markdown
+## Component agent
+Input: ...
+Output: ...
+
+## Test agent
+Input: ...
+Output: ...
+
+## Review agent
+Input: ...
+Output: ...
+```
+
+> [!TIP]
+> Keep each responsibility focused. The orchestration step will be easier when every agent has a clear input and output.

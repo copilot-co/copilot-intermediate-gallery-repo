@@ -1,17 +1,15 @@
-## You've built an AI-native workforce 🎉
+## You built an agent-native product workflow
 
-You now have, sitting in this repo, ready to reuse:
+You now have:
 
-- A **context library** covering 3 types of work.
-- An **adopted skill** instead of a hand-rolled one.
-- A **mocked integration** (with a clear path to a real one).
-- A **proactive agent** on a daily schedule.
-- A **reactive coding agent** that fans out to parallel subagents, plus a testing agent.
-- A **maintenance agent graph** — your first piece of graph engineering.
+- A context library shared by every agent.
+- A visual review skill selected for a specific responsibility.
+- Component, test, and review agents with focused roles.
+- A Favorites pull request built with `/fleet` and documented with `/orchestrate`.
 
-You proved this workforce on the Favorites ticket, and named what would carry over to the next one. That reusable pattern — not the one feature — is the actual deliverable.
+The reusable workflow is the deliverable. Favorites is the evidence that its context, capabilities, and agents can produce a real product change and describe it afterward.
 
 > [!TIP]
-> Take this same pattern to a real ticket next. Swap the mock integration for a real webhook, and see how much of what you built here survives unchanged.
+> Try the same workflow on another feature. Keep the pieces that transfer unchanged and refine only the parts that depend on the new product goal.
 
-This tracking issue is now closed out — thanks for working through it!
+This tracking issue is now complete.

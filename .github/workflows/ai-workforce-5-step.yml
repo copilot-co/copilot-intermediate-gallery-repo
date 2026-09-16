@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 5: Proactive agent"
+name: "AI Workforce - Step 5: Create the agents"
 
 on:
   issue_comment:
@@ -22,16 +22,12 @@ jobs:
       pr_number: ${{ steps.find.outputs.pr_number }}
     steps:
       - id: find
-        env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
-        run: |
-          NUM=$(echo "$COMMENT_BODY" | grep -ioE 'Proactive PR:\s*#[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
-          if [ -n "$NUM" ]; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "pr_number=$NUM" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const match = (context.payload.comment.body || '').match(/Agents PR:\s*#(\d+)/i);
+            core.setOutput('found', String(Boolean(match)));
+            if (match) core.setOutput('pr_number', match[1]);
 
   check_step_work:
     needs: find_exercise
@@ -47,28 +43,28 @@ jobs:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
             const prNumber = Number('${{ needs.find_exercise.outputs.pr_number }}');
-            let files = [];
             try {
-              const res = await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber });
-              files = res.data;
-            } catch (e) {
+              const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: prNumber })).data;
+              const required = [
+                '.github/agents/component.agent.md',
+                '.github/agents/test.agent.md',
+                '.github/agents/review.agent.md',
+              ];
+              const present = required.filter((path) =>
+                files.some((file) => file.filename === path && file.status !== 'removed'));
+              const reviewFile = files.find((file) => file.filename === '.github/agents/review.agent.md');
+              const usesSkill = /web-design-reviewer/i.test(reviewFile?.patch || '');
+              const passed = present.length === required.length && usesSkill;
+              if (!passed) {
+                await helpers.postComment(github, context, context.issue.number,
+                  `PR #${prNumber} includes ${present.length}/3 required agent files. Review agent references \`web-design-reviewer\` = ${usesSkill}. Add what is missing, push the changes, and comment again.`);
+              }
+              core.setOutput('passed', String(passed));
+            } catch (error) {
               await helpers.postComment(github, context, context.issue.number,
-                `I couldn't find PR #${prNumber} — double check the number and comment again.`);
+                `I couldn't find PR #${prNumber}. Check the number and comment again.`);
               core.setOutput('passed', 'false');
-              return;
             }
-
-            const workflowFiles = files.filter((f) => f.filename.startsWith('.github/workflows/'));
-            const agentFiles = files.filter((f) => f.filename.startsWith('.github/agents/'));
-            const hasCron = workflowFiles.some((f) => helpers.hasDailyCronSchedule(f.patch || ''));
-            const hasRanking = agentFiles.some((f) => /priorit|rank/i.test(f.patch || ''));
-            const passed = hasCron && hasRanking;
-
-            if (!passed) {
-              await helpers.postComment(github, context, context.issue.number,
-                `PR #${prNumber}: found daily cron trigger = ${hasCron}, found priority/ranking language in an agent file = ${hasRanking}. Both are needed — check your workflow's \`schedule: - cron:\` entry and your agent's expected output.`);
-            }
-            core.setOutput('passed', String(passed));
 
   post_next_step_content:
     needs: [find_exercise, check_step_work]

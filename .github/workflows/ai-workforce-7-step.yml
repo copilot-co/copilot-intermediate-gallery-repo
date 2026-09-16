@@ -1,4 +1,4 @@
-name: "AI Workforce - Step 7: Agent graph"
+name: "AI Workforce - Step 7: Reflect"
 
 on:
   issue_comment:
@@ -6,7 +6,6 @@ on:
 
 permissions:
   issues: write
-  pull-requests: read
   contents: read
 
 jobs:
@@ -35,26 +34,13 @@ jobs:
         with:
           script: |
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const commentBody = context.payload.comment.body || '';
-            let source = commentBody;
-
-            const prMatch = commentBody.match(/Graph PR:\s*#(\d+)/i);
-            if (prMatch) {
-              try {
-                const files = (await github.rest.pulls.listFiles({ ...context.repo, pull_number: Number(prMatch[1]) })).data;
-                source += '\n' + files.map((f) => f.patch || '').join('\n');
-              } catch (e) {
-                // fall back to whatever mermaid is in the comment itself
-              }
-            }
-
-            const mermaid = helpers.extractMermaidBlock(source);
-            const check = helpers.checkMermaidGraph(mermaid, { minNodes: 3 });
-            const passed = !!check.passes;
+            const body = context.payload.comment.body || '';
+            const r = helpers.checkReflection(body);
+            const passed = r.hasWorkforceWins && r.hasHumanDecision && r.hasFutureFeature && r.hasReusableParts;
 
             if (!passed) {
               await helpers.postComment(github, context, context.issue.number,
-                `Your mermaid graph has ${check.nodeCount} node(s), fan-out = ${check.hasFanOut}, escalation label = ${check.hasEscalation}. Needs \u2265 3 nodes, one node fanning out to 2+ targets, and an edge/node labeled for escalation (e.g. "low confidence" or "human").`);
+                `Reflection check: agent work = ${r.hasWorkforceWins}, human decision = ${r.hasHumanDecision}, future feature = ${r.hasFutureFeature}, reusable context/skill/agents/orchestration = ${r.hasReusableParts}. Add what is missing and comment again.`);
             }
             core.setOutput('passed', String(passed));
 
@@ -69,6 +55,7 @@ jobs:
           script: |
             const fs = require('fs');
             const helpers = require(`${process.env.GITHUB_WORKSPACE}/scripts/ai-workforce-helpers.js`);
-            const body = fs.readFileSync('.github/steps/ai-workforce-8-step.md', 'utf8');
+            const body = fs.readFileSync('.github/steps/ai-workforce-completion.md', 'utf8');
             await helpers.postComment(github, context, context.issue.number, body);
-            await helpers.swapLabel(github, context, context.issue.number, 'step-7', 'step-8');
+            await helpers.swapLabel(github, context, context.issue.number, 'step-7', 'completed');
+            await github.rest.issues.update({ ...context.repo, issue_number: context.issue.number, state: 'closed' });
